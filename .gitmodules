@@ -1,0 +1,3 @@
+[submodule "azure-sdk-for-cpp"]
+	path = azure-sdk-for-cpp
+	url = https://github.com/Azure/azure-sdk-for-cpp.git
