@@ -35,6 +35,8 @@ set(SOURCE
     src/adaptor.h
     src/adaptor.cc
     src/file_ops.h
+    src/adaptors/azure_storage_blob_adaptor.h
+    src/adaptors/azure_storage_blob_adaptor.cc
     src/adaptors/azure_storage_datalake_adaptor.h
     src/adaptors/azure_storage_datalake_adaptor.cc
     src/adaptors/root_directory_adaptor.h

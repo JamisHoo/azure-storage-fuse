@@ -10,6 +10,7 @@
 #include "file_ops.h"
 #include "adaptors/root_directory_adaptor.h"
 #include "adaptors/azure_storage_datalake_adaptor.h"
+#include "adaptors/azure_storage_blob_adaptor.h"
 
 namespace {
     bool file_exists(const std::string& filename) {
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
             mount_at = account_name + "_" + container_name;
             if (container.contains("mount_at"))
                 mount_at = container["mount_at"];
-            std::abort();
+            adaptor = std::make_shared<AzureStorageBlobAdaptor>(account_name, container_name, account_key);
         } else if (type == "azure storage file") {
             std::string account_name = container["account_name"];
             std::string container_name = container["container_name"];
