@@ -14,7 +14,7 @@ struct FileStatus {
 
 struct DirectoryEntry {
     std::string name;
-    bool is_directory;
+    FileStatus status;
 };
 
 class BaseAdaptor {

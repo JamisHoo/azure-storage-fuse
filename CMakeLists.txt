@@ -10,6 +10,7 @@ endif()
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
+find_package(nlohmann_json)
 
 if(WIN32)
     find_path(FUSE3_INCLUDE_DIR fuse3/fuse.h REQUIRED PATHS "C:/Program Files (x86)/WinFsp/inc")
@@ -27,19 +28,22 @@ if(WIN32)
     set_target_properties(FUSE3 PROPERTIES IMPORTED_IMPLIB ${FUSE3_IMPORT_LIBRARY})
 endif()
 
+add_subdirectory(azure-sdk-for-cpp EXCLUDE_FROM_ALL)
+
 set(SOURCE
     src/main.cc
     src/adaptor.h
     src/adaptor.cc
     src/file_ops.h
-    src/adaptors/azure_storage_file_adaptor.h
-    src/adaptors/debug_adaptor.h
+    src/adaptors/azure_storage_datalake_adaptor.h
+    src/adaptors/azure_storage_datalake_adaptor.cc
     src/adaptors/root_directory_adaptor.h
     src/file_ops.cc
 )
 
 add_executable(azure_storage_fuse ${SOURCE})
-target_link_libraries(azure_storage_fuse Threads::Threads FUSE3)
+target_link_libraries(azure_storage_fuse Threads::Threads FUSE3 nlohmann_json::nlohmann_json)
+target_link_libraries(azure_storage_fuse azure-storage-blobs azure-storage-files-datalake azure-storage-files-shares)
 
 if(WIN32)
     target_compile_definitions(azure_storage_fusePUBLIC NOMINMAX)
@@ -55,3 +59,4 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "
     target_compile_options(azure_storage_fuse PRIVATE -O2)
 endif()
 
+configure_file(src/config.json config.json COPYONLY)

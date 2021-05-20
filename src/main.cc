@@ -5,13 +5,17 @@
 #include <vector>
 #include <string>
 
-#include "file_ops.h"
-#include "adaptors/debug_adaptor.h"
-#include "adaptors/root_directory_adaptor.h"
+#include <nlohmann/json.hpp>
 
-bool file_exists(const std::string& filename) {
-    std::ifstream fin(filename);
-    return fin.is_open();
+#include "file_ops.h"
+#include "adaptors/root_directory_adaptor.h"
+#include "adaptors/azure_storage_datalake_adaptor.h"
+
+namespace {
+    bool file_exists(const std::string& filename) {
+        std::ifstream fin(filename);
+        return fin.is_open();
+    }
 }
 
 int main(int argc, char** argv) {
@@ -40,20 +44,59 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    // load config
-    // parse config
-
     g_adaptors.emplace("", std::make_shared<RootDirectoryAdaptor>());
-    g_adaptors.emplace("debug", std::make_shared<DebugFileAdaptor>());
 
+    std::ifstream fin(config_file);
+    nlohmann::json j;
+    fin >> j;
+    for (const auto& container : j) {
+        std::string mount_at;
+        std::shared_ptr<BaseAdaptor> adaptor;
+
+        if (container.contains("enabled") && container["enabled"] == false)
+            continue;
+
+        std::string type = container["type"];
+        if (type == "azure storage datalake") {
+            std::string account_name = container["account_name"];
+            std::string container_name = container["container_name"];
+            std::string account_key = container["account_key"];
+            mount_at = account_name + "_" + container_name;
+            if (container.contains("mount_at"))
+                mount_at = container["mount_at"];
+            adaptor = std::make_shared<AzureStorageDataLakeAdaptor>(account_name, container_name, account_key);
+        } else if (type == "azure storage blob") {
+            std::string account_name = container["account_name"];
+            std::string container_name = container["container_name"];
+            std::string account_key = container["account_key"];
+            mount_at = account_name + "_" + container_name;
+            if (container.contains("mount_at"))
+                mount_at = container["mount_at"];
+            std::abort();
+        } else if (type == "azure storage file") {
+            std::string account_name = container["account_name"];
+            std::string container_name = container["container_name"];
+            std::string account_key = container["account_key"];
+            mount_at = account_name + "_" + container_name;
+            if (container.contains("mount_at"))
+                mount_at = container["mount_at"];
+            std::abort();
+        }
+
+        auto inserted = g_adaptors.emplace(mount_at, std::move(adaptor)).second;
+        if (!inserted) {
+            std::cout << "duplicate container name: " << mount_at << std::endl;
+            return 1;
+        }
+    }
 
     std::vector<char*> fuse_args;
     fuse_args.emplace_back(argv[0]);
     std::string fuse_f = "-f";
     fuse_args.emplace_back(&fuse_f[0]);
-    fuse_args.emplace_back(&mount_point[0]);
     for (int i = fuse_args_n; i < argc; ++i)
         fuse_args.emplace_back(argv[i]);
+    fuse_args.emplace_back(&mount_point[0]);
 
     struct fuse_operations vrfs_operations;
     std::memset(&vrfs_operations, 0, sizeof(vrfs_operations));

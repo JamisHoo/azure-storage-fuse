@@ -27,6 +27,23 @@ struct directory_context {
     bool new_listing = true;
 };
 
+void file_status_to_fuse_stat(const FileStatus& file_status, fuse_stat* stbuf) {
+    std::memset(stbuf, 0, sizeof(*stbuf));
+
+    stbuf->st_mode = file_status.is_directory ? (S_IFDIR | 0775) : (S_IFREG | 0664);
+    stbuf->st_nlink = 1;
+    stbuf->st_size = file_status.file_size;
+    stbuf->st_uid = 1000;
+    stbuf->st_gid = 1000;
+
+#ifdef _WIN32
+    stbuf->st_mtim.tv_sec = 0;
+    stbuf->st_mtim.tv_nsec = 0;
+#else
+    stbuf->st_mtime = 0;
+#endif
+}
+
 std::tuple<std::string, std::string> parse_path(const std::string& path) {
     if (path[0] != '/')
         std::abort();
@@ -95,20 +112,7 @@ int fs_getattr(const char* path, fuse_stat* stbuf, fuse_file_info* fi) {
     if (ret < 0)
         return ret;
 
-    std::memset(stbuf, 0, sizeof(*stbuf));
-
-    stbuf->st_mode = file_status.is_directory ? (S_IFDIR | 0775) : (S_IFREG | 0442);
-    stbuf->st_nlink = 1;
-    stbuf->st_size = file_status.file_size;
-    stbuf->st_uid = 1000;
-    stbuf->st_gid = 1000;
-
-#ifdef _WIN32
-    stbuf->st_mtim.tv_sec = 0;
-    stbuf->st_mtim.tv_nsec = 0;
-#else
-    stbuf->st_mtime = 0;
-#endif
+    file_status_to_fuse_stat(file_status, stbuf);
     return 0;
 }
 
@@ -156,13 +160,23 @@ int fs_readdir(const char* path, void* buff, fuse_fill_dir_t filler, fuse_off_t 
 
     if (offset == 0)
     {
-        int ret = filler(buff, ".", nullptr, offset + 1, fuse_fill_dir_flags(0));
+        FileStatus file_status;
+        file_status.is_directory = true;
+        file_status.file_size = 0;
+        fuse_stat stbuf;
+        file_status_to_fuse_stat(file_status, &stbuf);
+        int ret = filler(buff, ".", &stbuf, offset + 1, fuse_fill_dir_flags(0));
         if (ret != 0)
             return 0;
         offset++;
     }
     if (offset == 1) {
-        int ret = filler(buff, "..", nullptr, offset + 1, fuse_fill_dir_flags(0));
+        FileStatus file_status;
+        file_status.is_directory = true;
+        file_status.file_size = 0;
+        fuse_stat stbuf;
+        file_status_to_fuse_stat(file_status, &stbuf);
+        int ret = filler(buff, "..", &stbuf, offset + 1, fuse_fill_dir_flags(0));
         if (ret != 0)
             return 0;
         offset++;
@@ -170,7 +184,9 @@ int fs_readdir(const char* path, void* buff, fuse_fill_dir_t filler, fuse_off_t 
 
     do {
         for (; context->pos < context->directory_entries.size(); context->pos++) {
-            int ret = filler(buff, context->directory_entries[context->pos].name.data(), nullptr, offset + 1, fuse_fill_dir_flags(0));
+            fuse_stat stbuf;
+            file_status_to_fuse_stat(context->directory_entries[context->pos].status, &stbuf);
+            int ret = filler(buff, context->directory_entries[context->pos].name.data(), &stbuf, offset + 1, fuse_fill_dir_flags(0));
             if (ret != 0)
                 return 0;
             ++offset;

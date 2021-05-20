@@ -41,7 +41,8 @@ public:
                     continue;
                 DirectoryEntry e;
                 e.name = i.first;
-                e.is_directory = true;
+                e.status.is_directory = true;
+                e.status.file_size = 0;
                 directory_entries.emplace_back(std::move(e));
             }
             continuation_token.clear();
