@@ -25,6 +25,7 @@ int AzureStorageFileAdaptor::getattr(const std::string& path, FileStatus& file_s
             auto properties = fs_client.GetProperties().Value;
             file_status.is_directory = true;
             file_status.file_size = 0;
+            file_status.last_modified_time = std::chrono::system_clock::time_point(properties.LastModified);
         } catch (Azure::Storage::StorageException& e) {
             int ret = translate_exception(e);
             if (ret != 0)
@@ -38,6 +39,7 @@ int AzureStorageFileAdaptor::getattr(const std::string& path, FileStatus& file_s
         auto properties = file_client.GetProperties().Value;
         file_status.is_directory = false;
         file_status.file_size = properties.FileSize;
+        file_status.last_modified_time = std::chrono::system_clock::time_point(properties.LastModified);
         return 0;
     } catch (Azure::Storage::StorageException& e) {
         if (e.StatusCode != Azure::Core::Http::HttpStatusCode::NotFound)
@@ -53,6 +55,7 @@ int AzureStorageFileAdaptor::getattr(const std::string& path, FileStatus& file_s
         auto properties = directory_client.GetProperties().Value;
         file_status.is_directory = true;
         file_status.file_size = 0;
+        file_status.last_modified_time = std::chrono::system_clock::time_point(properties.LastModified);
         return 0;
     } catch (Azure::Storage::StorageException& e) {
         int ret = translate_exception(e);

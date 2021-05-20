@@ -8,7 +8,7 @@
 
 class RootDirectoryAdaptor : public BaseAdaptor {
 public:
-    RootDirectoryAdaptor() {}
+    RootDirectoryAdaptor(): m_last_modified_time(std::chrono::system_clock::now()) {}
 
     ~RootDirectoryAdaptor() override = default;
 
@@ -16,16 +16,10 @@ public:
         if (path == ".") {
             file_status.is_directory = true;
             file_status.file_size = 0;
+            file_status.last_modified_time = m_last_modified_time;
             return 0;
         }
         std::abort();
-        auto ite = g_adaptors.find(path);
-        if (ite == g_adaptors.end()) {
-            return -ENOENT;
-        }
-        file_status.is_directory = true;
-        file_status.file_size = 0;
-        return 0;
     }
 
     int read(const std::string& /* path */, char* /* buff */, size_t /* size */, size_t /* offset */) override {
@@ -50,4 +44,7 @@ public:
         }
         std::abort();
     }
+
+private:
+    std::chrono::system_clock::time_point m_last_modified_time;
 };

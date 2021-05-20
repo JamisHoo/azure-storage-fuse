@@ -30,17 +30,22 @@ struct directory_context {
 void file_status_to_fuse_stat(const FileStatus& file_status, fuse_stat* stbuf) {
     std::memset(stbuf, 0, sizeof(*stbuf));
 
+    stbuf->st_dev = 0;
+    stbuf->st_ino = 0;
     stbuf->st_mode = file_status.is_directory ? (S_IFDIR | 0775) : (S_IFREG | 0664);
     stbuf->st_nlink = 1;
-    stbuf->st_size = file_status.file_size;
     stbuf->st_uid = 1000;
     stbuf->st_gid = 1000;
+    stbuf->st_rdev = 0;
+    stbuf->st_size = file_status.file_size;
+    stbuf->st_blksize = 512;
+    stbuf->st_blocks = (file_status.file_size + stbuf->st_blksize - 1) / stbuf->st_blksize;
 
 #ifdef _WIN32
     stbuf->st_mtim.tv_sec = 0;
     stbuf->st_mtim.tv_nsec = 0;
 #else
-    stbuf->st_mtime = 0;
+    stbuf->st_mtime = file_status.last_modified_time.time_since_epoch().count() * std::chrono::system_clock::period::num / std::chrono::system_clock::period::den;
 #endif
 }
 
@@ -113,6 +118,7 @@ int fs_getattr(const char* path, fuse_stat* stbuf, fuse_file_info* fi) {
         return ret;
 
     file_status_to_fuse_stat(file_status, stbuf);
+    std::cout << "getattr(" << path << "), mtime: " << stbuf->st_mtim.tv_sec << std::endl;
     return 0;
 }
 

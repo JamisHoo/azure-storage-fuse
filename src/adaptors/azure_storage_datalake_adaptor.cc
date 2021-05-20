@@ -26,6 +26,7 @@ int AzureStorageDataLakeAdaptor::getattr(const std::string& path, FileStatus& fi
             auto properties = fs_client.GetProperties().Value;
             file_status.is_directory = true;
             file_status.file_size = 0;
+            file_status.last_modified_time = std::chrono::system_clock::time_point(properties.LastModified);
         } catch (Azure::Storage::StorageException& e) {
             int ret = translate_exception(e);
             if (ret != 0)
@@ -39,6 +40,7 @@ int AzureStorageDataLakeAdaptor::getattr(const std::string& path, FileStatus& fi
         auto properties = path_client.GetProperties().Value;
         file_status.is_directory = properties.IsDirectory;
         file_status.file_size = properties.FileSize;
+        file_status.last_modified_time = std::chrono::system_clock::time_point(properties.LastModified);
     } catch (Azure::Storage::StorageException& e) {
         int ret = translate_exception(e);
         if (ret != 0)
@@ -87,6 +89,7 @@ int AzureStorageDataLakeAdaptor::list(const std::string& path, std::vector<Direc
                 e.name = e.name.substr(path.length() + 1);
             e.status.is_directory = false;
             e.status.file_size = p.BlobSize;
+            e.status.last_modified_time = std::chrono::system_clock::time_point(p.Details.LastModified);
             directory_entries.emplace_back(std::move(e));
         }
         for (auto& p : paths_page.BlobPrefixes) {

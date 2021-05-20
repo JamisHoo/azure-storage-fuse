@@ -6,10 +6,12 @@
 #include <unordered_map>
 #include <string>
 #include <functional>
+#include <chrono>
 
 struct FileStatus {
     bool is_directory;
     size_t file_size;
+    std::chrono::time_point<std::chrono::system_clock> last_modified_time;
 };
 
 struct DirectoryEntry {
