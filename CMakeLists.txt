@@ -31,16 +31,18 @@ endif()
 add_subdirectory(azure-sdk-for-cpp EXCLUDE_FROM_ALL)
 
 set(SOURCE
-    src/main.cc
     src/adaptor.h
     src/adaptor.cc
-    src/file_ops.h
     src/adaptors/azure_storage_blob_adaptor.h
     src/adaptors/azure_storage_blob_adaptor.cc
     src/adaptors/azure_storage_datalake_adaptor.h
     src/adaptors/azure_storage_datalake_adaptor.cc
+    src/adaptors/azure_storage_file_adaptor.h
+    src/adaptors/azure_storage_file_adaptor.cc
     src/adaptors/root_directory_adaptor.h
+    src/file_ops.h
     src/file_ops.cc
+    src/main.cc
 )
 
 add_executable(azure_storage_fuse ${SOURCE})

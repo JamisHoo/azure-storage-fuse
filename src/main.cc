@@ -11,6 +11,7 @@
 #include "adaptors/root_directory_adaptor.h"
 #include "adaptors/azure_storage_datalake_adaptor.h"
 #include "adaptors/azure_storage_blob_adaptor.h"
+#include "adaptors/azure_storage_file_adaptor.h"
 
 namespace {
     bool file_exists(const std::string& filename) {
@@ -81,7 +82,7 @@ int main(int argc, char** argv) {
             mount_at = account_name + "_" + container_name;
             if (container.contains("mount_at"))
                 mount_at = container["mount_at"];
-            std::abort();
+            adaptor = std::make_shared<AzureStorageFileAdaptor>(account_name, container_name, account_key);
         }
 
         auto inserted = g_adaptors.emplace(mount_at, std::move(adaptor)).second;
