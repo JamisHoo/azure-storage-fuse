@@ -50,7 +50,7 @@ target_link_libraries(azure_storage_fuse Threads::Threads FUSE3 nlohmann_json::n
 target_link_libraries(azure_storage_fuse azure-storage-blobs azure-storage-files-datalake azure-storage-files-shares)
 
 if(WIN32)
-    target_compile_definitions(azure_storage_fusePUBLIC NOMINMAX)
+    target_compile_definitions(azure_storage_fuse PUBLIC NOMINMAX)
     add_custom_command(TARGET azure_storage_fuse POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${FUSE3_LIBRARY}" $<TARGET_FILE_DIR:azure_storage_fuse>)
