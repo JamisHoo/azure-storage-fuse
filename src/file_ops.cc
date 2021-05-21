@@ -10,6 +10,7 @@
 #include <iostream>
 #include <tuple>
 
+namespace {
 struct file_context
 {
   std::string container_name;
@@ -80,6 +81,7 @@ std::shared_ptr<BaseAdaptor> resolve_path(const std::string& container_name)
   auto ite = g_adaptors.find(container_name);
   return ite == g_adaptors.end() ? nullptr : ite->second;
 }
+} // namespace
 
 int fs_open(const char* path, fuse_file_info* fi)
 {
