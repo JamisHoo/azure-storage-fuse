@@ -134,7 +134,6 @@ int fs_getattr(const char* path, fuse_stat* stbuf, fuse_file_info* fi)
     return ret;
 
   file_status_to_fuse_stat(file_status, stbuf);
-  std::cout << "getattr(" << path << "), mtime: " << stbuf->st_mtim.tv_sec << std::endl;
   return 0;
 }
 
