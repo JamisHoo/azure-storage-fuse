@@ -61,6 +61,8 @@ int main(int argc, char** argv)
   fin >> j;
   g_entry_timeout = j["entry_timeout"];
   g_attr_timeout = j["attr_timeout"];
+  g_auto_cache = j["auto_cache"];
+  g_kernel_cache = j["kernel_cache"];
   for (const auto& container : j["cloud_services"])
   {
     std::string mount_at;

@@ -85,6 +85,7 @@ std::shared_ptr<BaseAdaptor> resolve_path(const std::string& container_name)
 double g_entry_timeout = 0.0;
 double g_attr_timeout = 0.0;
 int g_auto_cache = 1;
+int g_kernel_cache = 0;
 
 void* fs_init(struct fuse_conn_info* conn, struct fuse_config* cfg)
 {
@@ -92,6 +93,7 @@ void* fs_init(struct fuse_conn_info* conn, struct fuse_config* cfg)
   cfg->entry_timeout = g_entry_timeout;
   cfg->attr_timeout = g_attr_timeout;
   cfg->auto_cache = g_auto_cache;
+  cfg->kernel_cache = g_kernel_cache;
   return nullptr;
 }
 

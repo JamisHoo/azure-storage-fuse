@@ -111,7 +111,9 @@ You can define several cloud storage services in configuration file. Below is an
         }
     ],
     "entry_timeout": 1800,
-    "attr_timeout": 3600
+    "attr_timeout": 3600,
+    "auto_cache": 1,
+    "kernel_cache": 0
 }
 ```
 

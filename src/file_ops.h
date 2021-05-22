@@ -18,6 +18,7 @@ using fuse_stat = struct stat;
 extern double g_entry_timeout;
 extern double g_attr_timeout;
 extern int g_auto_cache;
+extern int g_kernel_cache;
 
 void* fs_init(struct fuse_conn_info* conn, struct fuse_config* cfg);
 
