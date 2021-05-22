@@ -15,6 +15,12 @@ using fuse_off_t = off_t;
 using fuse_stat = struct stat;
 #endif
 
+extern double g_entry_timeout;
+extern double g_attr_timeout;
+extern int g_auto_cache;
+
+void* fs_init(struct fuse_conn_info* conn, struct fuse_config* cfg);
+
 int fs_open(const char* path, fuse_file_info* fi);
 int fs_getattr(const char* path, fuse_stat* stbuf, fuse_file_info* fi);
 int fs_read(const char* path, char* buff, size_t size, fuse_off_t offset, fuse_file_info* fi);

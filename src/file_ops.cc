@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <tuple>
 
 namespace {
@@ -82,6 +81,19 @@ std::shared_ptr<BaseAdaptor> resolve_path(const std::string& container_name)
   return ite == g_adaptors.end() ? nullptr : ite->second;
 }
 } // namespace
+
+double g_entry_timeout = 0.0;
+double g_attr_timeout = 0.0;
+int g_auto_cache = 1;
+
+void* fs_init(struct fuse_conn_info* conn, struct fuse_config* cfg)
+{
+  (void)conn;
+  cfg->entry_timeout = g_entry_timeout;
+  cfg->attr_timeout = g_attr_timeout;
+  cfg->auto_cache = g_auto_cache;
+  return nullptr;
+}
 
 int fs_open(const char* path, fuse_file_info* fi)
 {

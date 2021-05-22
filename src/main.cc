@@ -59,7 +59,9 @@ int main(int argc, char** argv)
   std::ifstream fin(config_file);
   nlohmann::json j;
   fin >> j;
-  for (const auto& container : j)
+  g_entry_timeout = j["entry_timeout"];
+  g_attr_timeout = j["attr_timeout"];
+  for (const auto& container : j["cloud_services"])
   {
     std::string mount_at;
     std::shared_ptr<BaseAdaptor> adaptor;
@@ -120,6 +122,7 @@ int main(int argc, char** argv)
 
   struct fuse_operations vrfs_operations;
   std::memset(&vrfs_operations, 0, sizeof(vrfs_operations));
+  vrfs_operations.init = fs_init;
   vrfs_operations.open = fs_open;
   vrfs_operations.getattr = fs_getattr;
   vrfs_operations.read = fs_read;

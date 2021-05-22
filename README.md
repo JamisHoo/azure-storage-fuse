@@ -89,26 +89,30 @@ I've never tried to run it on macOS, but it should be the same as on Linux becau
 You can define several cloud storage services in configuration file. Below is an example of configuration file and explanation for each field.
 
 ```json
-[
 {
-    "type": "azure storage datalake",
-    "account_name": "your account name",
-    "container_name": "your container name",
-    "account_key": "your account shared key"
-},
-{
-    "type": "azure storage blob",
-    "account_name": "your account name",
-    "container_name": "your container name",
-    "account_key": "your account shared key"
-},
-{
-    "type": "azure storage file",
-    "account_name": "your account name",
-    "container_name": "your share name",
-    "account_key": "your account shared key"
+    "cloud_services": [
+        {
+            "type": "azure storage datalake",
+            "account_name": "your account name",
+            "container_name": "your container name",
+            "account_key": "your account shared key"
+        },
+        {
+            "type": "azure storage blob",
+            "account_name": "your account name",
+            "container_name": "your container name",
+            "account_key": "your account shared key"
+        },
+        {
+            "type": "azure storage file",
+            "account_name": "your account name",
+            "container_name": "your share name",
+            "account_key": "your account shared key"
+        }
+    ],
+    "entry_timeout": 1800,
+    "attr_timeout": 3600
 }
-]
 ```
 
 | Field           | Description |
