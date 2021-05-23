@@ -1,5 +1,7 @@
 #include "azure_storage_file_adaptor.h"
 
+#include "application_id.h"
+
 using namespace Azure::Storage::Files::Shares;
 
 namespace {
@@ -28,9 +30,11 @@ AzureStorageFileAdaptor::AzureStorageFileAdaptor(
 
 int AzureStorageFileAdaptor::getattr(const std::string& path, FileStatus& file_status)
 {
+  ShareClientOptions clientOptions;
+  clientOptions.Telemetry.ApplicationId = g_application_id;
   if (path == ".")
   {
-    auto fs_client = ShareClient(m_share_url, m_key_credential);
+    auto fs_client = ShareClient(m_share_url, m_key_credential, clientOptions);
     try
     {
       auto properties = fs_client.GetProperties().Value;
@@ -50,7 +54,7 @@ int AzureStorageFileAdaptor::getattr(const std::string& path, FileStatus& file_s
   }
   try
   {
-    auto file_client = ShareFileClient(m_share_url + "/" + path, m_key_credential);
+    auto file_client = ShareFileClient(m_share_url + "/" + path, m_key_credential, clientOptions);
     auto properties = file_client.GetProperties().Value;
     file_status.is_directory = false;
     file_status.file_size = properties.FileSize;
@@ -69,7 +73,8 @@ int AzureStorageFileAdaptor::getattr(const std::string& path, FileStatus& file_s
   }
   try
   {
-    auto directory_client = ShareDirectoryClient(m_share_url + "/" + path, m_key_credential);
+    auto directory_client
+        = ShareDirectoryClient(m_share_url + "/" + path, m_key_credential, clientOptions);
     auto properties = directory_client.GetProperties().Value;
     file_status.is_directory = true;
     file_status.file_size = 0;
@@ -87,7 +92,9 @@ int AzureStorageFileAdaptor::getattr(const std::string& path, FileStatus& file_s
 
 int AzureStorageFileAdaptor::read(const std::string& path, char* buff, size_t size, size_t offset)
 {
-  auto file_client = ShareFileClient(m_share_url + "/" + path, m_key_credential);
+  ShareClientOptions clientOptions;
+  clientOptions.Telemetry.ApplicationId = g_application_id;
+  auto file_client = ShareFileClient(m_share_url + "/" + path, m_key_credential, clientOptions);
   DownloadFileToOptions download_options;
   download_options.Range = Azure::Core::Http::HttpRange();
   download_options.Range.Value().Offset = offset;
@@ -126,7 +133,9 @@ int AzureStorageFileAdaptor::list(
   std::string url = m_share_url;
   if (path != ".")
     url += "/" + path;
-  auto directory_client = ShareDirectoryClient(url, m_key_credential);
+  ShareClientOptions clientOptions;
+  clientOptions.Telemetry.ApplicationId = g_application_id;
+  auto directory_client = ShareDirectoryClient(url, m_key_credential, clientOptions);
 
   ListFilesAndDirectoriesOptions list_options;
   if (!continuation_token.empty())

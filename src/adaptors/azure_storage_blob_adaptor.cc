@@ -1,5 +1,7 @@
 #include "azure_storage_blob_adaptor.h"
 
+#include "application_id.h"
+
 using namespace Azure::Storage::Blobs;
 
 namespace {
@@ -28,7 +30,10 @@ AzureStorageBlobAdaptor::AzureStorageBlobAdaptor(
 
 int AzureStorageBlobAdaptor::getattr(const std::string& path, FileStatus& file_status)
 {
-  auto blob_container_client = BlobContainerClient(m_blob_container_url, m_key_credential);
+  BlobClientOptions clientOptions;
+  clientOptions.Telemetry.ApplicationId = g_application_id;
+  auto blob_container_client
+      = BlobContainerClient(m_blob_container_url, m_key_credential, clientOptions);
   if (path == ".")
   {
     try
@@ -94,7 +99,9 @@ int AzureStorageBlobAdaptor::getattr(const std::string& path, FileStatus& file_s
 
 int AzureStorageBlobAdaptor::read(const std::string& path, char* buff, size_t size, size_t offset)
 {
-  auto blob_client = BlobClient(m_blob_container_url + "/" + path, m_key_credential);
+  BlobClientOptions clientOptions;
+  clientOptions.Telemetry.ApplicationId = g_application_id;
+  auto blob_client = BlobClient(m_blob_container_url + "/" + path, m_key_credential, clientOptions);
   DownloadBlobToOptions download_options;
   download_options.Range = Azure::Core::Http::HttpRange();
   download_options.Range.Value().Offset = offset;
@@ -130,7 +137,10 @@ int AzureStorageBlobAdaptor::list(
     std::vector<DirectoryEntry>& directory_entries,
     std::string& continuation_token)
 {
-  auto container_client = BlobContainerClient(m_blob_container_url, m_key_credential);
+  BlobClientOptions clientOptions;
+  clientOptions.Telemetry.ApplicationId = g_application_id;
+  auto container_client
+      = BlobContainerClient(m_blob_container_url, m_key_credential, clientOptions);
   ListBlobsOptions list_options;
   if (path != ".")
     list_options.Prefix = path + '/';

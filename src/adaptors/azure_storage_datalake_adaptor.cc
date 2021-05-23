@@ -1,5 +1,7 @@
 #include "azure_storage_datalake_adaptor.h"
 
+#include "application_id.h"
+
 using namespace Azure::Storage::Files::DataLake;
 
 namespace {
@@ -29,9 +31,11 @@ AzureStorageDataLakeAdaptor::AzureStorageDataLakeAdaptor(
 
 int AzureStorageDataLakeAdaptor::getattr(const std::string& path, FileStatus& file_status)
 {
+  DataLakeClientOptions clientOptions;
+  clientOptions.Telemetry.ApplicationId = g_application_id;
   if (path == ".")
   {
-    auto fs_client = DataLakeFileSystemClient(m_filesystem_url, m_key_credential);
+    auto fs_client = DataLakeFileSystemClient(m_filesystem_url, m_key_credential, clientOptions);
     try
     {
       auto properties = fs_client.GetProperties().Value;
@@ -49,7 +53,8 @@ int AzureStorageDataLakeAdaptor::getattr(const std::string& path, FileStatus& fi
     }
     return 0;
   }
-  auto path_client = DataLakePathClient(m_filesystem_url + "/" + path, m_key_credential);
+  auto path_client
+      = DataLakePathClient(m_filesystem_url + "/" + path, m_key_credential, clientOptions);
   try
   {
     auto properties = path_client.GetProperties().Value;
@@ -73,7 +78,10 @@ int AzureStorageDataLakeAdaptor::read(
     size_t size,
     size_t offset)
 {
-  auto file_client = DataLakeFileClient(m_filesystem_url + "/" + path, m_key_credential);
+  DataLakeClientOptions clientOptions;
+  clientOptions.Telemetry.ApplicationId = g_application_id;
+  auto file_client
+      = DataLakeFileClient(m_filesystem_url + "/" + path, m_key_credential, clientOptions);
   DownloadFileToOptions download_options;
   download_options.Range = Azure::Core::Http::HttpRange();
   download_options.Range.Value().Offset = offset;
@@ -109,8 +117,10 @@ int AzureStorageDataLakeAdaptor::list(
     std::vector<DirectoryEntry>& directory_entries,
     std::string& continuation_token)
 {
-  auto container_client
-      = Azure::Storage::Blobs::BlobContainerClient(m_blob_container_url, m_key_credential);
+  Azure::Storage::Blobs::BlobClientOptions clientOptions;
+  clientOptions.Telemetry.ApplicationId = g_application_id;
+  auto container_client = Azure::Storage::Blobs::BlobContainerClient(
+      m_blob_container_url, m_key_credential, clientOptions);
   Azure::Storage::Blobs::ListBlobsOptions list_options;
   if (path != ".")
     list_options.Prefix = path + '/';
