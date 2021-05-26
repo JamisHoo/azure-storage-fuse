@@ -56,9 +56,11 @@ int main(int argc, char** argv)
 
   g_adaptors.emplace("", std::make_shared<RootDirectoryAdaptor>());
 
-  std::ifstream fin(config_file);
   nlohmann::json j;
-  fin >> j;
+  {
+    std::ifstream fin(config_file);
+    fin >> j;
+  }
   g_entry_timeout = j["entry_timeout"];
   g_attr_timeout = j["attr_timeout"];
   g_auto_cache = j["auto_cache"];
