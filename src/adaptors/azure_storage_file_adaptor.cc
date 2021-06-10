@@ -148,7 +148,7 @@ int AzureStorageFileAdaptor::list(
       DirectoryEntry e;
       e.name = std::move(p.Name);
       e.status.is_directory = false;
-      e.status.file_size = p.Details.ContentLength;
+      e.status.file_size = p.Details.FileSize;
       directory_entries.emplace_back(std::move(e));
     }
     for (auto& p : paths_page.Directories)
